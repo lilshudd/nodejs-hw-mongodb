@@ -12,10 +12,15 @@ const setupServer = () => {
   app.use('/contacts', contactsRouter);
 
   app.use((req, res) => {
-    res.status(404).json({ message: 'Not found' });
+    res.status(404).json({ status: 404, message: 'Not found' });
   });
 
-  const PORT = process.env.PORT || 3000;
+  app.use((err, req, res) => {
+    const statusCode = err.status || 500;
+    res.status(statusCode).json({ status: statusCode, message: err.message });
+  });
+
+  const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
