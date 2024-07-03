@@ -1,40 +1,51 @@
 const { Contact } = require('../db/contact');
 
-const getContacts = async (req, res) => {
-  try {
-    const contacts = await Contact.find();
-    res.json({
-      status: 200,
-      message: 'Successfully found contacts!',
-      data: contacts,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ status: 500, message: 'Server error' });
-  }
+const getContacts = async ({ page, perPage, sortBy, sortOrder, filters }) => {
+  const totalItems = await Contact.countDocuments(filters);
+  const totalPages = Math.ceil(totalItems / perPage);
+  const hasPreviousPage = page > 1;
+  const hasNextPage = page < totalPages;
+
+  const contacts = await Contact.find(filters)
+    .sort({ [sortBy]: sortOrder === 'asc' ? 1 : -1 })
+    .skip((page - 1) * perPage)
+    .limit(Number(perPage));
+
+  return {
+    contacts,
+    page,
+    perPage,
+    totalItems,
+    totalPages,
+    hasPreviousPage,
+    hasNextPage,
+  };
 };
 
-const getContactById = async (req, res) => {
-  try {
-    const { contactId } = req.params;
-    const contact = await Contact.findById(contactId);
-
-    if (!contact) {
-      return res.status(404).json({
-        status: 404,
-        message: `Contact with id ${contactId} not found`,
-      });
-    }
-
-    res.json({
-      status: 200,
-      message: `Successfully found contact with id ${contactId}!`,
-      data: contact,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ status: 500, message: 'Server error' });
-  }
+const getContactById = async (contactId) => {
+  return await Contact.findById(contactId);
 };
 
-module.exports = { getContacts, getContactById };
+const createContact = async (contactData) => {
+  const newContact = new Contact(contactData);
+  await newContact.save();
+  return newContact;
+};
+
+const updateContact = async (contactId, updateData) => {
+  return await Contact.findByIdAndUpdate(contactId, updateData, {
+    new: true,
+  });
+};
+
+const deleteContact = async (contactId) => {
+  return await Contact.findByIdAndDelete(contactId);
+};
+
+module.exports = {
+  getContacts,
+  getContactById,
+  createContact,
+  updateContact,
+  deleteContact,
+};

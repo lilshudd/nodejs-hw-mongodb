@@ -1,19 +1,45 @@
-const { Contact } = require('../db/contact');
 const createError = require('http-errors');
 const ctrlWrapper = require('../middlewares/ctrlWrapper');
+const {
+  getContacts,
+  getContactById,
+  createContact,
+  updateContact,
+  deleteContact,
+} = require('../services/contacts');
 
-const getContacts = ctrlWrapper(async (req, res) => {
-  const contacts = await Contact.find();
+const getContactsController = ctrlWrapper(async (req, res) => {
+  const {
+    page = 1,
+    perPage = 10,
+    sortBy = 'name',
+    sortOrder = 'asc',
+    type,
+    isFavourite,
+  } = req.query;
+  const filters = {};
+
+  if (type) filters.contactType = type;
+  if (typeof isFavourite !== 'undefined') filters.isFavourite = isFavourite;
+
+  const contactsData = await getContacts({
+    page,
+    perPage,
+    sortBy,
+    sortOrder,
+    filters,
+  });
+
   res.json({
     status: 200,
     message: 'Successfully found contacts!',
-    data: contacts,
+    data: contactsData,
   });
 });
 
-const getContactById = ctrlWrapper(async (req, res) => {
+const getContactByIdController = ctrlWrapper(async (req, res) => {
   const { contactId } = req.params;
-  const contact = await Contact.findById(contactId);
+  const contact = await getContactById(contactId);
 
   if (!contact) {
     throw createError(404, 'Contact not found');
@@ -26,16 +52,8 @@ const getContactById = ctrlWrapper(async (req, res) => {
   });
 });
 
-const createContact = ctrlWrapper(async (req, res) => {
-  const { name, phoneNumber, email, isFavourite, contactType } = req.body;
-  const newContact = new Contact({
-    name,
-    phoneNumber,
-    email,
-    isFavourite,
-    contactType,
-  });
-  await newContact.save();
+const createContactController = ctrlWrapper(async (req, res) => {
+  const newContact = await createContact(req.body);
 
   res.status(201).json({
     status: 201,
@@ -44,11 +62,9 @@ const createContact = ctrlWrapper(async (req, res) => {
   });
 });
 
-const updateContact = ctrlWrapper(async (req, res) => {
+const updateContactController = ctrlWrapper(async (req, res) => {
   const { contactId } = req.params;
-  const updatedContact = await Contact.findByIdAndUpdate(contactId, req.body, {
-    new: true,
-  });
+  const updatedContact = await updateContact(contactId, req.body);
 
   if (!updatedContact) {
     throw createError(404, 'Contact not found');
@@ -61,9 +77,9 @@ const updateContact = ctrlWrapper(async (req, res) => {
   });
 });
 
-const deleteContact = ctrlWrapper(async (req, res) => {
+const deleteContactController = ctrlWrapper(async (req, res) => {
   const { contactId } = req.params;
-  const deletedContact = await Contact.findByIdAndDelete(contactId);
+  const deletedContact = await deleteContact(contactId);
 
   if (!deletedContact) {
     throw createError(404, 'Contact not found');
@@ -73,9 +89,9 @@ const deleteContact = ctrlWrapper(async (req, res) => {
 });
 
 module.exports = {
-  getContacts,
-  getContactById,
-  createContact,
-  updateContact,
-  deleteContact,
+  getContacts: getContactsController,
+  getContactById: getContactByIdController,
+  createContact: createContactController,
+  updateContact: updateContactController,
+  deleteContact: deleteContactController,
 };
