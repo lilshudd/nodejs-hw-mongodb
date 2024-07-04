@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const createError = require('http-errors');
 const ctrlWrapper = require('../middlewares/ctrlWrapper');
 const {
@@ -7,6 +8,8 @@ const {
   updateContact,
   deleteContact,
 } = require('../services/contacts');
+
+const isValidId = (id) => mongoose.Types.ObjectId.isValid(id);
 
 const getContactsController = ctrlWrapper(async (req, res) => {
   const {
@@ -39,6 +42,11 @@ const getContactsController = ctrlWrapper(async (req, res) => {
 
 const getContactByIdController = ctrlWrapper(async (req, res) => {
   const { contactId } = req.params;
+
+  if (!isValidId(contactId)) {
+    throw createError(400, 'Invalid contact ID');
+  }
+
   const contact = await getContactById(contactId);
 
   if (!contact) {
@@ -64,6 +72,11 @@ const createContactController = ctrlWrapper(async (req, res) => {
 
 const updateContactController = ctrlWrapper(async (req, res) => {
   const { contactId } = req.params;
+
+  if (!isValidId(contactId)) {
+    throw createError(400, 'Invalid contact ID');
+  }
+
   const updatedContact = await updateContact(contactId, req.body);
 
   if (!updatedContact) {
@@ -79,6 +92,11 @@ const updateContactController = ctrlWrapper(async (req, res) => {
 
 const deleteContactController = ctrlWrapper(async (req, res) => {
   const { contactId } = req.params;
+
+  if (!isValidId(contactId)) {
+    throw createError(400, 'Invalid contact ID');
+  }
+
   const deletedContact = await deleteContact(contactId);
 
   if (!deletedContact) {
