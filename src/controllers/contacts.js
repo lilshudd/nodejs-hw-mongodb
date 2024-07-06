@@ -1,115 +1,55 @@
-const mongoose = require('mongoose');
 const createError = require('http-errors');
-const ctrlWrapper = require('../middlewares/ctrlWrapper');
-const {
-  getContacts,
-  getContactById,
-  createContact,
-  updateContact,
-  deleteContact,
-} = require('../services/contacts');
+const { Contact } = require('../db/contact');
 
-const isValidId = (id) => mongoose.Types.ObjectId.isValid(id);
+const getContacts = async (req, res) => {
+  const contacts = await Contact.find({ userId: req.user._id });
+  res.json(contacts);
+};
 
-const getContactsController = ctrlWrapper(async (req, res) => {
-  const {
-    page = 1,
-    perPage = 10,
-    sortBy = 'name',
-    sortOrder = 'asc',
-    type,
-    isFavourite,
-  } = req.query;
-  const filters = {};
-
-  if (type) filters.contactType = type;
-  if (typeof isFavourite !== 'undefined') filters.isFavourite = isFavourite;
-
-  const contactsData = await getContacts({
-    page,
-    perPage,
-    sortBy,
-    sortOrder,
-    filters,
+const getContactById = async (req, res) => {
+  const contact = await Contact.findOne({
+    _id: req.params.id,
+    userId: req.user._id,
   });
-
-  res.json({
-    status: 200,
-    message: 'Successfully found contacts!',
-    data: contactsData,
-  });
-});
-
-const getContactByIdController = ctrlWrapper(async (req, res) => {
-  const { contactId } = req.params;
-
-  if (!isValidId(contactId)) {
-    throw createError(400, 'Invalid contact ID');
-  }
-
-  const contact = await getContactById(contactId);
-
   if (!contact) {
     throw createError(404, 'Contact not found');
   }
+  res.json(contact);
+};
 
-  res.json({
-    status: 200,
-    message: `Successfully found contact with id ${contactId}!`,
-    data: contact,
-  });
-});
+const addContact = async (req, res) => {
+  const contact = new Contact({ ...req.body, userId: req.user._id });
+  await contact.save();
+  res.status(201).json(contact);
+};
 
-const createContactController = ctrlWrapper(async (req, res) => {
-  const newContact = await createContact(req.body);
-
-  res.status(201).json({
-    status: 201,
-    message: 'Successfully created a contact!',
-    data: newContact,
-  });
-});
-
-const updateContactController = ctrlWrapper(async (req, res) => {
-  const { contactId } = req.params;
-
-  if (!isValidId(contactId)) {
-    throw createError(400, 'Invalid contact ID');
-  }
-
-  const updatedContact = await updateContact(contactId, req.body);
-
-  if (!updatedContact) {
+const updateContact = async (req, res) => {
+  const contact = await Contact.findOneAndUpdate(
+    { _id: req.params.id, userId: req.user._id },
+    { $set: req.body },
+    { new: true },
+  );
+  if (!contact) {
     throw createError(404, 'Contact not found');
   }
+  res.json(contact);
+};
 
-  res.json({
-    status: 200,
-    message: 'Successfully updated a contact!',
-    data: updatedContact,
+const deleteContact = async (req, res) => {
+  const contact = await Contact.findOneAndDelete({
+    _id: req.params.id,
+    userId: req.user._id,
   });
-});
-
-const deleteContactController = ctrlWrapper(async (req, res) => {
-  const { contactId } = req.params;
-
-  if (!isValidId(contactId)) {
-    throw createError(400, 'Invalid contact ID');
-  }
-
-  const deletedContact = await deleteContact(contactId);
-
-  if (!deletedContact) {
+  if (!contact) {
     throw createError(404, 'Contact not found');
   }
-
   res.status(204).send();
-});
+};
 
 module.exports = {
-  getContacts: getContactsController,
-  getContactById: getContactByIdController,
-  createContact: createContactController,
-  updateContact: updateContactController,
-  deleteContact: deleteContactController,
+  getContacts,
+  getContactById,
+  addContact,
+  updateContact,
+  deleteContact,
 };
