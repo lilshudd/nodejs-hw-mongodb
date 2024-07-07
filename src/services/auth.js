@@ -39,12 +39,12 @@ const loginUser = async ({ email, password }) => {
     userId: user._id,
     accessToken,
     refreshToken,
-    accessTokenValidUntil: new Date(Date.now() + 15 * 60 * 1000),
-    refreshTokenValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    accessTokenExpiresAt: new Date(Date.now() + 15 * 60 * 1000),
+    refreshTokenExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   });
   await newSession.save();
 
-  return { user, accessToken };
+  return { user, accessToken, refreshToken };
 };
 
 const refreshSession = async (refreshToken) => {
@@ -68,12 +68,12 @@ const refreshSession = async (refreshToken) => {
     userId,
     accessToken: newAccessToken,
     refreshToken: newRefreshToken,
-    accessTokenValidUntil: new Date(Date.now() + 15 * 60 * 1000),
-    refreshTokenValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    accessTokenExpiresAt: new Date(Date.now() + 15 * 60 * 1000),
+    refreshTokenExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   });
   await newSession.save();
 
-  return { accessToken: newAccessToken };
+  return { accessToken: newAccessToken, refreshToken: newRefreshToken };
 };
 
 const logoutUser = async (refreshToken) => {

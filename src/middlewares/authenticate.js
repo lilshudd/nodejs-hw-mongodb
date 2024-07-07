@@ -9,7 +9,7 @@ const authenticate = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
-    throw createError(401, 'Authorization header is missing');
+    return next(createError(401, 'Authorization header is missing'));
   }
 
   const token = authHeader.split(' ')[1];
@@ -19,18 +19,19 @@ const authenticate = async (req, res, next) => {
     const session = await Session.findOne({ accessToken: token });
 
     if (!session) {
-      throw createError(401, 'Access token expired');
+      return next(createError(401, 'Invalid or expired token'));
     }
 
     const user = await User.findById(decoded.userId);
+
     if (!user) {
-      throw createError(401, 'User not found');
+      return next(createError(401, 'User not found'));
     }
 
     req.user = user;
     next();
-  } catch (error) {
-    next(createError(401, error.message));
+  } catch {
+    next(createError(401, 'Invalid or expired token'));
   }
 };
 

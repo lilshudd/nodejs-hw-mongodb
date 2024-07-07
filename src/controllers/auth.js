@@ -30,22 +30,32 @@ const registerController = ctrlWrapper(async (req, res) => {
 
 const loginController = ctrlWrapper(async (req, res) => {
   const { email, password } = req.body;
-  const { user, accessToken } = await loginUser({ email, password });
+  const { user, accessToken, refreshToken } = await loginUser({
+    email,
+    password,
+  });
 
   if (!user) {
     throw createError(401, 'Invalid email or password');
   }
 
+  res.cookie('refreshToken', refreshToken, { httpOnly: true });
+
   res.status(200).json({
     status: 'success',
-    message: 'Successfully logged in an user!',
+    message: 'Successfully logged in a user!',
     data: { accessToken },
   });
 });
 
 const refreshController = ctrlWrapper(async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
-  const { accessToken } = await refreshSession(refreshToken);
+  if (!refreshToken) {
+    throw createError(401, 'Refresh token is missing');
+  }
+  const { accessToken, newRefreshToken } = await refreshSession(refreshToken);
+
+  res.cookie('refreshToken', newRefreshToken, { httpOnly: true });
 
   res.status(200).json({
     status: 'success',
@@ -56,7 +66,12 @@ const refreshController = ctrlWrapper(async (req, res) => {
 
 const logoutController = ctrlWrapper(async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
+  if (!refreshToken) {
+    throw createError(401, 'Refresh token is missing');
+  }
   await logoutUser(refreshToken);
+
+  res.clearCookie('refreshToken');
 
   res.status(204).send();
 });
