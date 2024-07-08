@@ -16,11 +16,11 @@ const sessionSchema = new Schema(
       type: String,
       required: true,
     },
-    accessTokenValidUntil: {
+    accessTokenExpiresAt: {
       type: Date,
       required: true,
     },
-    refreshTokenValidUntil: {
+    refreshTokenExpiresAt: {
       type: Date,
       required: true,
     },
