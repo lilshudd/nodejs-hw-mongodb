@@ -36,9 +36,10 @@ const addContact = async (req, res) => {
 };
 
 const updateContact = async (req, res) => {
+  const { id } = req.params;
   const contact = await Contact.findOneAndUpdate(
-    { _id: req.params.id, userId: req.user._id },
-    { $set: req.body },
+    { _id: id, userId: req.user._id },
+    req.body,
     { new: true },
   );
   if (!contact) {
@@ -52,18 +53,15 @@ const updateContact = async (req, res) => {
 };
 
 const deleteContact = async (req, res) => {
+  const { id } = req.params;
   const contact = await Contact.findOneAndDelete({
-    _id: req.params.id,
+    _id: id,
     userId: req.user._id,
   });
   if (!contact) {
     throw createError(404, 'Contact not found');
   }
-  res.status(204).json({
-    status: 'success',
-    message: 'Contact deleted successfully',
-    data: {},
-  });
+  res.status(204).send();
 };
 
 module.exports = {
