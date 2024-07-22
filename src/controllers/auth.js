@@ -48,20 +48,23 @@ const loginController = ctrlWrapper(async (req, res) => {
   });
 });
 
-const refreshController = ctrlWrapper(async (req, res) => {
+const refreshController = ctrlWrapper(async (req, res, next) => {
   const refreshToken = req.cookies.refreshToken;
   if (!refreshToken) {
     throw createError(401, 'Refresh token is missing');
   }
-  const { accessToken, newRefreshToken } = await refreshSession(refreshToken);
+  try {
+    const { accessToken, newRefreshToken } = await refreshSession(refreshToken);
+    res.cookie('refreshToken', newRefreshToken, { httpOnly: true });
 
-  res.cookie('refreshToken', newRefreshToken, { httpOnly: true });
-
-  res.status(200).json({
-    status: 'success',
-    message: 'Successfully refreshed a session!',
-    data: { accessToken },
-  });
+    res.status(200).json({
+      status: 'success',
+      message: 'Successfully refreshed a session!',
+      data: { accessToken },
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 const logoutController = ctrlWrapper(async (req, res) => {

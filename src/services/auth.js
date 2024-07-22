@@ -23,7 +23,7 @@ const registerUser = async ({ name, email, password }) => {
 const loginUser = async ({ email, password }) => {
   const user = await User.findOne({ email });
   if (!user || !(await bcrypt.compare(password, user.password))) {
-    return null;
+    throw createError(401, 'Invalid email or password');
   }
 
   const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, {

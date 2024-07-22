@@ -26,8 +26,8 @@ const getContactById = async (contactId, userId) => {
 
 const createContact = async (contactData) => {
   const newContact = new Contact(contactData);
-  await newContact.save();
-  return newContact;
+  const savedContact = await newContact.save();
+  return savedContact.toObject({ versionKey: false });
 };
 
 const updateContact = async (contactId, updateData, userId) => {
