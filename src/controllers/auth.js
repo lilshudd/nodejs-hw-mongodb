@@ -16,9 +16,13 @@ const registerController = ctrlWrapper(async (req, res) => {
   }
 
   res.status(201).json({
-    name: user.name,
-    email: user.email,
-    createdAt: user.createdAt,
+    status: 201,
+    message: 'User registered successfully',
+    data: {
+      name: user.name,
+      email: user.email,
+      createdAt: user.createdAt,
+    },
   });
 });
 
@@ -35,7 +39,11 @@ const loginController = ctrlWrapper(async (req, res) => {
 
   res.cookie('refreshToken', refreshToken, { httpOnly: true });
 
-  res.status(200).json({ accessToken });
+  res.status(200).json({
+    status: 200,
+    message: 'Login successful',
+    data: { accessToken },
+  });
 });
 
 const refreshController = ctrlWrapper(async (req, res, next) => {
@@ -47,7 +55,11 @@ const refreshController = ctrlWrapper(async (req, res, next) => {
     const { accessToken, newRefreshToken } = await refreshSession(refreshToken);
     res.cookie('refreshToken', newRefreshToken, { httpOnly: true });
 
-    res.status(200).json({ accessToken });
+    res.status(200).json({
+      status: 200,
+      message: 'Token refreshed successfully',
+      data: { accessToken },
+    });
   } catch (error) {
     next(error);
   }
@@ -62,7 +74,11 @@ const logoutController = ctrlWrapper(async (req, res) => {
 
   res.clearCookie('refreshToken');
 
-  res.status(204).send();
+  res.status(204).json({
+    status: 204,
+    message: 'Logout successful',
+    data: null,
+  });
 });
 
 module.exports = {
