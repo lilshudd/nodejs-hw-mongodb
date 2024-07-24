@@ -12,20 +12,12 @@ const authenticate = require('../middlewares/authenticate');
 
 const router = express.Router();
 
-router.get('/', authenticate, getContactsController);
-router.get('/:id', authenticate, getContactByIdController);
-router.post(
-  '/',
-  authenticate,
-  validateBody(contactSchema),
-  addContactController,
-);
-router.patch(
-  '/:id',
-  authenticate,
-  validateBody(contactSchema),
-  updateContactController,
-);
-router.delete('/:id', authenticate, deleteContactController);
+router.use(authenticate);
+
+router.get('/', getContactsController);
+router.get('/:id', getContactByIdController);
+router.post('/', validateBody(contactSchema), addContactController);
+router.patch('/:id', validateBody(contactSchema), updateContactController);
+router.delete('/:id', deleteContactController);
 
 module.exports = router;

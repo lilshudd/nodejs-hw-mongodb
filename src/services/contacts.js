@@ -1,6 +1,14 @@
 const { Contact } = require('../db/contact');
 
-const getContacts = async ({ page, perPage, sortBy, sortOrder, filters }) => {
+const getContacts = async ({
+  userId,
+  page = 1,
+  perPage = 10,
+  sortBy = 'createdAt',
+  sortOrder = 'asc',
+  filters = {},
+}) => {
+  filters.userId = userId;
   const totalItems = await Contact.countDocuments(filters);
   const totalPages = Math.ceil(totalItems / perPage);
   const hasPreviousPage = page > 1;
