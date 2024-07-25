@@ -1,11 +1,12 @@
-const mongoose = require('mongoose');
+const { Schema, model } = require('mongoose');
 
-const SessionSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  accessToken: { type: String, required: true },
+const sessionSchema = new Schema({
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   refreshToken: { type: String, required: true },
-  accessTokenExpiresAt: { type: Date, required: true },
-  refreshTokenExpiresAt: { type: Date, required: true },
+  accessTokenValidUntil: { type: Date, required: true },
+  refreshTokenValidUntil: { type: Date, required: true },
 });
 
-module.exports = mongoose.model('Session', SessionSchema);
+const Session = model('Session', sessionSchema);
+
+module.exports = { Session };
