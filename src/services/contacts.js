@@ -1,5 +1,5 @@
 const createHttpError = require('http-errors');
-const { Contact } = require('../models/Contact');
+const { Contact } = require('../models/contact');
 const { uploadImage } = require('../config/cloudinary');
 
 const getContacts = async (userId) => {
