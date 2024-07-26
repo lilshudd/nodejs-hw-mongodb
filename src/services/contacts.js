@@ -1,6 +1,6 @@
 const createHttpError = require('http-errors');
 const { Contact } = require('../models/Contact');
-const { uploadImage } = require('./cloudinary');
+const { uploadImage } = require('../config/cloudinary');
 
 const getContacts = async (userId) => {
   return await Contact.find({ owner: userId });
