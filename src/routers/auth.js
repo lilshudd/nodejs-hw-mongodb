@@ -1,31 +1,21 @@
 const express = require('express');
+const router = express.Router();
 const {
-  registerController,
-  loginController,
-  refreshController,
-  logoutController,
   sendResetEmailController,
   resetPasswordController,
 } = require('../controllers/auth');
 const validateBody = require('../middlewares/validateBody');
 const {
-  registerSchema,
-  loginSchema,
-  emailSchema,
+  sendResetEmailSchema,
   resetPasswordSchema,
 } = require('../schemas/auth');
 
-const router = express.Router();
-
-router.post('/register', validateBody(registerSchema), registerController);
-router.post('/login', validateBody(loginSchema), loginController);
-router.post('/refresh', refreshController);
-router.post('/logout', logoutController);
 router.post(
   '/send-reset-email',
-  validateBody(emailSchema),
+  validateBody(sendResetEmailSchema),
   sendResetEmailController,
 );
+
 router.post(
   '/reset-pwd',
   validateBody(resetPasswordSchema),
