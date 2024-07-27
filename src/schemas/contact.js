@@ -1,16 +1,20 @@
 const Joi = require('joi');
 
 const createContactSchema = Joi.object({
-  name: Joi.string().min(3).max(30).required(),
+  name: Joi.string().required(),
   email: Joi.string().email().required(),
-  phone: Joi.string().min(10).max(15).required(),
+  phoneNumber: Joi.string().required(),
+  isFavourite: Joi.boolean().optional(),
+  contactType: Joi.string().valid('work', 'home', 'personal').optional(),
 });
 
 const updateContactSchema = Joi.object({
-  name: Joi.string().min(3).max(30),
-  email: Joi.string().email(),
-  phone: Joi.string().min(10).max(15),
-}).or('name', 'email', 'phone');
+  name: Joi.string().optional(),
+  email: Joi.string().email().optional(),
+  phoneNumber: Joi.string().optional(),
+  isFavourite: Joi.boolean().optional(),
+  contactType: Joi.string().valid('work', 'home', 'personal').optional(),
+});
 
 module.exports = {
   createContactSchema,

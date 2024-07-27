@@ -1,4 +1,4 @@
-const { Contact } = require('../db/contact');
+const { Contact } = require('../models/contact');
 
 const getContacts = async ({ page, perPage, sortBy, sortOrder, filters }) => {
   const skip = (page - 1) * perPage;
@@ -12,8 +12,8 @@ const getContactById = async (id, userId) => {
   return await Contact.findOne({ _id: id, userId });
 };
 
-const createContact = async (contactData, photo) => {
-  const contact = new Contact({ ...contactData, photo });
+const createContact = async (contactData) => {
+  const contact = new Contact(contactData);
   return await contact.save();
 };
 

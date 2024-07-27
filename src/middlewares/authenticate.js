@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const createError = require('http-errors');
-const { User } = require('../db/user');
-const { Session } = require('../db/session');
+const { User } = require('../db/User');
+const { Session } = require('../db/Session');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 

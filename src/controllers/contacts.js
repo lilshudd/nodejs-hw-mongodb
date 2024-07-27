@@ -1,5 +1,5 @@
 const createError = require('http-errors');
-const { Contact } = require('../db/contact');
+const Contact = require('../models/contact');
 const ctrlWrapper = require('../middlewares/ctrlWrapper');
 
 const getContactsController = ctrlWrapper(async (req, res) => {
@@ -23,8 +23,17 @@ const getContactByIdController = ctrlWrapper(async (req, res) => {
 });
 
 const createContactController = ctrlWrapper(async (req, res) => {
-  const { name, email, phone } = req.body;
-  const contact = new Contact({ name, email, phone, owner: req.user._id });
+  const { name, email, phoneNumber, isFavourite, contactType } = req.body;
+  const photo = req.file ? req.file.buffer.toString('base64') : '';
+  const contact = new Contact({
+    name,
+    email,
+    phoneNumber,
+    isFavourite,
+    contactType,
+    photo,
+    owner: req.user._id,
+  });
   await contact.save();
   res.status(201).json({
     status: 201,
@@ -34,10 +43,11 @@ const createContactController = ctrlWrapper(async (req, res) => {
 
 const updateContactController = ctrlWrapper(async (req, res) => {
   const { id } = req.params;
-  const { name, email, phone } = req.body;
+  const { name, email, phoneNumber, isFavourite, contactType } = req.body;
+  const photo = req.file ? req.file.buffer.toString('base64') : '';
   const contact = await Contact.findOneAndUpdate(
     { _id: id, owner: req.user._id },
-    { name, email, phone },
+    { name, email, phoneNumber, isFavourite, contactType, photo },
     { new: true },
   );
   if (!contact) {
