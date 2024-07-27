@@ -1,43 +1,30 @@
-const createHttpError = require('http-errors');
-const { Contact } = require('../models/contact');
-const { uploadImage } = require('../config/cloudinary');
+const { Contact } = require('../db/contact');
 
-const getContacts = async (userId) => {
-  return await Contact.find({ owner: userId });
+const getContacts = async ({ page, perPage, sortBy, sortOrder, filters }) => {
+  const skip = (page - 1) * perPage;
+  const limit = perPage;
+  const sort = { [sortBy]: sortOrder === 'asc' ? 1 : -1 };
+  const query = { ...filters };
+  return await Contact.find(query).skip(skip).limit(limit).sort(sort).exec();
 };
 
-const getContactById = async (contactId, userId) => {
-  return await Contact.findOne({ _id: contactId, owner: userId });
+const getContactById = async (id, userId) => {
+  return await Contact.findOne({ _id: id, userId });
 };
 
-const createContact = async (data, file) => {
-  if (file) {
-    const result = await uploadImage(file);
-    data.photo = result.secure_url;
-  }
-  const contact = new Contact(data);
+const createContact = async (contactData, photo) => {
+  const contact = new Contact({ ...contactData, photo });
   return await contact.save();
 };
 
-const updateContact = async (contactId, data, userId, file) => {
-  const contact = await Contact.findOne({ _id: contactId, owner: userId });
-  if (!contact) {
-    throw createHttpError(404, 'Contact not found.');
-  }
-  if (file) {
-    const result = await uploadImage(file);
-    data.photo = result.secure_url;
-  }
-  Object.assign(contact, data);
-  return await contact.save();
-};
-
-const deleteContact = async (contactId, userId) => {
-  const contact = await Contact.findOneAndDelete({
-    _id: contactId,
-    owner: userId,
+const updateContact = async (id, updateData, userId) => {
+  return await Contact.findOneAndUpdate({ _id: id, userId }, updateData, {
+    new: true,
   });
-  return contact;
+};
+
+const deleteContact = async (id, userId) => {
+  return await Contact.findOneAndDelete({ _id: id, userId });
 };
 
 module.exports = {

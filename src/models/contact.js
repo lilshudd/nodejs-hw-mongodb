@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { Schema } = mongoose;
+const Schema = mongoose.Schema;
 
 const contactSchema = new Schema(
   {
@@ -7,29 +7,18 @@ const contactSchema = new Schema(
       type: String,
       required: true,
     },
-    phoneNumber: {
+    email: {
       type: String,
       required: true,
     },
-    email: {
+    phone: {
       type: String,
+      required: false,
     },
-    isFavourite: {
-      type: Boolean,
-      default: false,
-    },
-    contactType: {
-      type: String,
-      enum: ['work', 'home', 'personal'],
-      default: 'personal',
-    },
-    userId: {
+    owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-    },
-    imageUrl: {
-      type: String,
     },
   },
   { timestamps: true },
@@ -37,4 +26,6 @@ const contactSchema = new Schema(
 
 const Contact = mongoose.model('Contact', contactSchema);
 
-module.exports = { Contact };
+module.exports = {
+  Contact,
+};

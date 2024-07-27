@@ -1,33 +1,23 @@
 const express = require('express');
-const router = express.Router();
 const {
   getContactsController,
   getContactByIdController,
-  addContactController,
+  createContactController,
   updateContactController,
   deleteContactController,
 } = require('../controllers/contacts');
-const authenticate = require('../middlewares/authenticate');
 const validateBody = require('../middlewares/validateBody');
-const { contactSchema } = require('../schemas/contact');
-const upload = require('../middlewares/multer');
+const {
+  createContactSchema,
+  updateContactSchema,
+} = require('../schemas/contact');
 
-router.get('/', authenticate, getContactsController);
-router.get('/:id', authenticate, getContactByIdController);
-router.post(
-  '/',
-  authenticate,
-  upload.single('photo'),
-  validateBody(contactSchema),
-  addContactController,
-);
-router.patch(
-  '/:id',
-  authenticate,
-  upload.single('photo'),
-  validateBody(contactSchema),
-  updateContactController,
-);
-router.delete('/:id', authenticate, deleteContactController);
+const router = express.Router();
+
+router.get('/', getContactsController);
+router.get('/:id', getContactByIdController);
+router.post('/', validateBody(createContactSchema), createContactController);
+router.put('/:id', validateBody(updateContactSchema), updateContactController);
+router.delete('/:id', deleteContactController);
 
 module.exports = router;
