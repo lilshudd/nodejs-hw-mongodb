@@ -2,8 +2,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const createError = require('http-errors');
 const nodemailer = require('nodemailer');
-const { User } = require('../db/User');
-const { Session } = require('../db/Session');
+const { User } = require('../models/User');
+const { Session } = require('../models/Session');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const ACCESS_TOKEN_EXPIRATION = '15m';
