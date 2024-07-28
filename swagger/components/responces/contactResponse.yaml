@@ -1,0 +1,6 @@
+ContactResponse:
+  description: A single contact
+  content:
+    application/json:
+      schema:
+        $ref: ../schemas/contactSchema.yaml
