@@ -1,9 +1,10 @@
 const createError = require('http-errors');
 const Contact = require('../models/contact');
+const { uploadImage } = require('../services/cloudinary');
 const ctrlWrapper = require('../middlewares/ctrlWrapper');
 
 const getContactsController = ctrlWrapper(async (req, res) => {
-  const contacts = await Contact.find({ owner: req.user._id });
+  const contacts = await Contact.find();
   res.status(200).json({
     status: 200,
     data: contacts,
@@ -12,7 +13,7 @@ const getContactsController = ctrlWrapper(async (req, res) => {
 
 const getContactByIdController = ctrlWrapper(async (req, res) => {
   const { id } = req.params;
-  const contact = await Contact.findOne({ _id: id, owner: req.user._id });
+  const contact = await Contact.findById(id);
   if (!contact) {
     throw createError(404, 'Contact not found');
   }
@@ -24,7 +25,8 @@ const getContactByIdController = ctrlWrapper(async (req, res) => {
 
 const createContactController = ctrlWrapper(async (req, res) => {
   const { name, email, phoneNumber, isFavourite, contactType } = req.body;
-  const photo = req.file ? req.file.buffer.toString('base64') : '';
+  const photo = req.file ? await uploadImage(req.file.buffer) : '';
+
   const contact = new Contact({
     name,
     email,
@@ -32,7 +34,6 @@ const createContactController = ctrlWrapper(async (req, res) => {
     isFavourite,
     contactType,
     photo,
-    owner: req.user._id,
   });
   await contact.save();
   res.status(201).json({
@@ -44,9 +45,10 @@ const createContactController = ctrlWrapper(async (req, res) => {
 const updateContactController = ctrlWrapper(async (req, res) => {
   const { id } = req.params;
   const { name, email, phoneNumber, isFavourite, contactType } = req.body;
-  const photo = req.file ? req.file.buffer.toString('base64') : '';
-  const contact = await Contact.findOneAndUpdate(
-    { _id: id, owner: req.user._id },
+  const photo = req.file ? await uploadImage(req.file.buffer) : '';
+
+  const contact = await Contact.findByIdAndUpdate(
+    id,
     { name, email, phoneNumber, isFavourite, contactType, photo },
     { new: true },
   );
@@ -61,10 +63,7 @@ const updateContactController = ctrlWrapper(async (req, res) => {
 
 const deleteContactController = ctrlWrapper(async (req, res) => {
   const { id } = req.params;
-  const contact = await Contact.findOneAndDelete({
-    _id: id,
-    owner: req.user._id,
-  });
+  const contact = await Contact.findByIdAndDelete(id);
   if (!contact) {
     throw createError(404, 'Contact not found');
   }
