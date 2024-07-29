@@ -1,10 +1,17 @@
 const { Contact } = require('../models/contact');
 
-const getContacts = async ({ page, perPage, sortBy, sortOrder, filters }) => {
+const getContacts = async ({
+  userId,
+  page,
+  perPage,
+  sortBy,
+  sortOrder,
+  filters,
+}) => {
   const skip = (page - 1) * perPage;
   const limit = perPage;
   const sort = { [sortBy]: sortOrder === 'asc' ? 1 : -1 };
-  const query = { ...filters };
+  const query = { ...filters, userId };
   return await Contact.find(query).skip(skip).limit(limit).sort(sort).exec();
 };
 
